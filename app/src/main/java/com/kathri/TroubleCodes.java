@@ -1,24 +1,88 @@
 package com.kathri;
 
+import android.os.AsyncTask;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class TroubleCodes {
 
-    public String getFaultCode(String fault)
+    public String getFaultCode(String fault, String vehicleId)
     {
         String faultDesc = null;
-
         for(String qty : FAULTS)
         {
             String[] values = qty.toString().split(";");
             if(fault.contains(values[0]))
             {
-                return values[1];
                 // Send request to the server and notify user
+                this.sendNotification("http://localhost/2193290/WebService/NotifyUserError.php?vehicle_id="+vehicleId+"&errormsg="+qty);
+                return values[1];
             }
         }
-
         return faultDesc;
     }
 
+    //Send notification to the user.
+    private void sendNotification(final String urlWebService) {
+        class GetJSON extends AsyncTask<Void, Void, String> {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                JSONArray jsonArray = null;
+                try {
+                    jsonArray = new JSONArray(s);
+                    JSONObject obj = jsonArray.getJSONObject(0);
+                    int status = obj.getInt("status");
+                    if (status == 1) {
+                       Toast.makeText( null,"Appointment Updated !", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            protected String doInBackground(Void... voids) {
+                try {
+                    URL url = new URL(urlWebService);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                    String json;
+
+                    while ((json = bufferedReader.readLine()) != null) {
+
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (Exception e) {
+                    return null;
+                }
+
+            }
+        }
+        GetJSON getJSON = new GetJSON();
+        getJSON.execute();
+    }
+    
     private String[] FAULTS = {
 
             "P0001;Fuel Volume Regulator Control Circuit/Open",
