@@ -76,10 +76,6 @@ public class GaugeRpm extends View {
     public static final float TEXT_VALUE_SIZE = 0.2f;
     public static final float TEXT_UNIT_SIZE = 0.05f;
 
-    // *--------------------------------------------------------------------- *//
-    // Customizable properties
-    // *--------------------------------------------------------------------- *//
-
     private boolean mShowOuterShadow;
     private boolean mShowOuterBorder;
     private boolean mShowOuterRim;
@@ -145,8 +141,6 @@ public class GaugeRpm extends View {
 
     private Path mNeedleRightPath;
     private Path mNeedleLeftPath;
-
-    // *--------------------------------------------------------------------- *//
 
     private float mScaleRotation;
     private float mDivisionValue;
@@ -305,17 +299,12 @@ public class GaugeRpm extends View {
 
         initDrawingRects();
         initDrawingTools();
-
-        // Compute the scale properties
-        if (mShowRanges) {
+ if (mShowRanges) {
             initScale();
         }
     }
 
     public void initDrawingRects() {
-        // The drawing area is a rectangle of width 1 and height 1,
-        // where (0,0) is the top left corner of the canvas.
-        // Note that on Canvas X axis points to right, while the Y axis points downwards.
         mOuterShadowRect = new RectF(LEFT, TOP, RIGHT, BOTTOM);
 
         mOuterBorderRect = new RectF(mOuterShadowRect.left + mOuterShadowWidth, mOuterShadowRect.top + mOuterShadowWidth,
@@ -391,11 +380,10 @@ public class GaugeRpm extends View {
     }
 
     public Paint getDefaultOuterRimPaint() {
-        // Use a linear gradient to create the 3D effect
         final LinearGradient verticalGradient = new LinearGradient(mOuterRimRect.left, mOuterRimRect.top, mOuterRimRect.left,
                 mOuterRimRect.bottom, Color.rgb(255, 255, 255), Color.rgb(84, 90, 100), TileMode.REPEAT);
 
-        // Use a Bitmap shader for the metallic style
+
         final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.light_alu);
         final BitmapShader aluminiumTile = new BitmapShader(bitmap, TileMode.REPEAT, TileMode.REPEAT);
         final Matrix matrix = new Matrix();
@@ -580,9 +568,6 @@ public class GaugeRpm extends View {
 
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
-        // Loggable.log.debug(String.format("widthMeasureSpec=%s, heightMeasureSpec=%s",
-        // View.MeasureSpec.toString(widthMeasureSpec),
-        // View.MeasureSpec.toString(heightMeasureSpec)));
 
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -616,10 +601,8 @@ public class GaugeRpm extends View {
 
     private void drawGauge() {
         if (null != mBackground) {
-            // Let go of the old background
             mBackground.recycle();
         }
-        // Create a new background according to the new width and height
         mBackground = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(mBackground);
         final float scale = Math.min(getWidth(), getHeight());
@@ -679,11 +662,8 @@ public class GaugeRpm extends View {
     }
 
     private void drawFace(final Canvas canvas) {
-        // Draw the face gradient
         canvas.drawOval(mFaceRect, mFacePaint);
-        // Draw the face border
         canvas.drawOval(mFaceRect, mFaceBorderPaint);
-        // Draw the inner face shadow
         canvas.drawOval(mFaceRect, mFaceShadowPaint);
     }
     private void drawText(final Canvas canvas) {
@@ -698,8 +678,7 @@ public class GaugeRpm extends View {
         if (!TextUtils.isEmpty(mTextUnit)) {
 
             mTextUnitPaint.setTextSize(1.0f);
-            //canvas.scale(0.05f, 0.05f);
-            canvas.drawText(mTextUnit,  CENTER + 9.5f ,  CENTER + 15f , mTextUnitPaint);
+           canvas.drawText(mTextUnit,  CENTER + 9.5f ,  CENTER + 15f , mTextUnitPaint);
         }
         canvas.restore();
     }
@@ -707,37 +686,23 @@ public class GaugeRpm extends View {
 
     private void drawScale(final Canvas canvas) {
         canvas.save();
-        // On canvas, North is 0 degrees, East is 90 degrees, South is 180 etc.
-        // We start the scale somewhere South-West so we need to first rotate the canvas.
-        canvas.rotate(mScaleRotation, 0.5f, 0.5f);
+         canvas.rotate(mScaleRotation, 0.5f, 0.5f);
 
         final int totalTicks = mDivisions * mSubdivisions + 1;
         for (int i = 0; i < totalTicks; i++) {
             final float y1 = mScaleRect.top;
-            final float y2 = y1 + 0.015f; // height of division
-            final float y3 = y1 + 0.045f; // height of subdivision
+            final float y2 = y1 + 0.015f;
+            final float y3 = y1 + 0.045f;
 
             final float value = getValueForTick(i);
-            //final Paint paint = getRangePaint(mScaleStartValue + value);
             final Paint paint = getRangePaint(value);
 
             float mod = value % mDivisionValue;
-	            /*if ((Math.abs(mod - 0) < 0.001) || (Math.abs(mod - mDivisionValue) < 0.001)) {
-					// Draw a division tick
-					canvas.drawLine(0.5f, y1, 0.5f, y3, paint);
-					// Draw the text 0.15 away from the division tick
-					drawTextOnCanvasWithMagnifier(canvas, valueString(value), 0.5f, y3 + 0.045f, paint);
-				} else {
-					// Draw a subdivision tick
-					canvas.drawLine(0.5f, y1, 0.5f, y2, paint);
-				}*/
+
             if ((Math.abs(mod - 0) < 0.001) || (Math.abs(mod - mDivisionValue) < 0.001)) {
-                // Draw a division tick
                 canvas.drawLine(0.5f, y1, 0.5f, y3, paint);
-                // Draw the text 0.15 away from the division tick
                 drawTextOnCanvasWithMagnifier(canvas, valueString(value), 0.5f, y3 + 0.045f, paint);
             } else {
-                // Draw a subdivision tick
                 canvas.drawLine(0.5f, y1, 0.5f, y2, paint);
             }
 
@@ -747,12 +712,8 @@ public class GaugeRpm extends View {
         canvas.restore();
     }
 
-    // Workaround to fix missing text on Lollipop and above,
-    // and probably some rendering issues with Jelly Bean and above
-    // Modified from http://stackoverflow.com/a/14989037/746068
     public static void drawTextOnCanvasWithMagnifier(Canvas canvas, String text, float x, float y, Paint paint) {
 
-            //workaround
             float originalStrokeWidth = paint.getStrokeWidth();
             float originalTextSize = paint.getTextSize();
             final float magnifier = 1000f;
@@ -791,7 +752,6 @@ public class GaugeRpm extends View {
     private void drawNeedle(final Canvas canvas) {
         if (mNeedleInitialized) {
             final float angle = getAngleForValue(mCurrentValue);
-            // Logger.log.info(String.format("value=%f -> angle=%f", mCurrentValue, angle));
 
             canvas.save();
             canvas.rotate(angle, 0.5f, 0.5f);
@@ -802,7 +762,6 @@ public class GaugeRpm extends View {
 
             canvas.restore();
 
-            // Draw the needle screw and its border
             canvas.drawCircle(0.5f, 0.5f, 0.04f, mNeedleScrewPaint);
             canvas.drawCircle(0.5f, 0.5f, 0.04f, mNeedleScrewBorderPaint);
         }
@@ -810,11 +769,9 @@ public class GaugeRpm extends View {
 
     private void setNeedleShadowPosition(final float angle) {
         if (angle > 180 && angle < 360) {
-            // Move shadow from right to left
-            mNeedleRightPaint.setShadowLayer(0, 0, 0, Color.BLACK);
+             mNeedleRightPaint.setShadowLayer(0, 0, 0, Color.BLACK);
             mNeedleLeftPaint.setShadowLayer(0.01f, -0.005f, 0.005f, Color.argb(127, 0, 0, 0));
         } else {
-            // Move shadow from left to right
             mNeedleLeftPaint.setShadowLayer(0, 0, 0, Color.BLACK);
             mNeedleRightPaint.setShadowLayer(0.01f, 0.005f, -0.005f, Color.argb(127, 0, 0, 0));
         }
@@ -825,9 +782,6 @@ public class GaugeRpm extends View {
     }
 
     private void computeCurrentValue() {
-        // Logger.log.warn(String.format("velocity=%f, acceleration=%f", mNeedleVelocity,
-        // mNeedleAcceleration));
-
         if (!(Math.abs(mCurrentValue - mTargetValue) > 0.01f)) {
             return;
         }
