@@ -3,11 +3,7 @@
 $username = $_POST['uname'];
 $password = md5($_POST['psw']);
 
-$mysqli = new mysqli("localhost", "root", "", "2193290");
-
-if ($mysqli->connect_errno) {
-    echo "Failed to connect to MySQL: " . $mysqli->connect_error;
-}
+include './DatabaseConnection.php';
 
 $sql = "SELECT user_id FROM users where username='$username' AND password='$password'";
 $result = $mysqli->query($sql);

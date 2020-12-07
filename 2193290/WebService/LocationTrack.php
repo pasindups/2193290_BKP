@@ -7,19 +7,9 @@ $time = date("Y-m-d H:i:s");
 
 $isDataSave = TRUE;
 
-//Datasaving to database
+include './DatabaseConnection.php';
 
-$mysqli = new mysqli("localhost", "root", "", "2193290");
-
-if ($mysqli->connect_errno) {
-    echo "Failed to connect to MySQL: " . $mysqli->connect_error;
-    $isDataSave = FALSE;
-}
-
-// Turn autocommit off
-$mysqli->autocommit(FALSE);
-
-// Insert some values
+// Insert values
 $mysqli->query("INSERT INTO locations('$vehicle_id','$lat','$lon','$time')");
 
 // Commit transaction
